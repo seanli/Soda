@@ -2,6 +2,8 @@
 
 using namespace std;
 
+PRNG r; // Global random generator
+
 void uMain::main() 
 {
   ConfigParms cparam;

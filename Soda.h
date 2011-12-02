@@ -146,4 +146,14 @@ _Monitor Printer
     void print(Kind kind, unsigned int lid, char state, int value1, int value2);
 };
 
+_Monitor PRNG 
+{
+  public:
+    PRNG( unsigned int seed = 1009 ) { srand( seed ); }
+    void seed( unsigned int seed ) { srand( seed ); }
+    unsigned int operator()() { return rand(); }
+}; // _Monitor PRNG
+
+extern PRNG r; // Global random generator
+
 #endif // _SODA_H_
