@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <sstream>
 
-#define Args unsigned int
+#define Args unsigned int 0
 
 struct ConfigParms 
 {
@@ -76,6 +76,7 @@ _Task WATCardOffice
 _Monitor Bank 
 {
   unsigned int numStudents;
+  int *bankAccounts;
   public:
     Bank(unsigned int numStudents);
     void deposit(unsigned int id, unsigned int amount);
