@@ -8,10 +8,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sstream>
+#include <stdint.h>
+#include <cassert>
 
 #define Args unsigned int
 
-struct ConfigParms 
+struct ConfigParms
 {
     unsigned int sodaCost;                      // MSRP per bottle
     unsigned int numStudents;                   // number of students to create
@@ -31,15 +33,16 @@ _Monitor Printer;
 _Monitor Bank;
 _Task NameServer;
 _Task WATCardOffice;
+_Task Truck;
 
-_Task Student 
+_Task Student
 {
     void main();
   public:
     Student(Printer &prt, NameServer &nameServer, WATCardOffice &cardOffice, unsigned int id, unsigned int maxPurchases);
 };
 
-class WATCard 
+class WATCard
 {
     WATCard(const WATCard &);			// prevent copying
     WATCard &operator=(const WATCard &);
@@ -51,10 +54,10 @@ class WATCard
 };
 typedef Future_ISM<WATCard*> FWATCard;		// future WATCard pointer
 
-_Task WATCardOffice 
+_Task WATCardOffice
 {
     struct Job // marshalled arguments and return future
-    {				
+    {
 		Args args;					// call arguments (YOU DEFINE "Args")
 		FWATCard result;			// return future
 		Job(Args args) : args(args) {}
@@ -70,7 +73,7 @@ _Task WATCardOffice
     Job *requestWork();
 };
 
-_Monitor Bank 
+_Monitor Bank
 {
   public:
     Bank(unsigned int numStudents);
@@ -78,19 +81,19 @@ _Monitor Bank
     void withdraw(unsigned int id, unsigned int amount);
 };
 
-_Task Parent 
+_Task Parent
 {
     void main();
   public:
     Parent(Printer &prt, Bank &bank, unsigned int numStudents, unsigned int parentalDelay);
 };
 
-_Task VendingMachine 
+_Task VendingMachine
 {
     void main();
   public:
-    enum Flavours {COKE, PEPSI, ROOTBEER}; 			// flavours of soda (YOU DEFINE)
-    enum Status {BUY, STOCK, FUNDS};				// purchase status: successful buy, out of stock, insufficient funds
+    enum Flavours {BLUES, CLASSICAL, ROCK, JAZZ, NUM_FLAVOURS}; 	// flavours of soda (YOU DEFINE)
+    enum Status {BUY, STOCK, FUNDS};								// purchase status: successful buy, out of stock, insufficient funds
     VendingMachine(Printer &prt, NameServer &nameServer, unsigned int id, unsigned int sodaCost, unsigned int maxStockPerFlavour);
     Status buy(Flavours flavour, WATCard &card);
     unsigned int *inventory();
@@ -99,34 +102,61 @@ _Task VendingMachine
     _Nomutex unsigned int getId();
 };
 
-_Task NameServer 
+_Task NameServer
 {
+	Printer &prt;
+	unsigned int numVendingMachines;
+	unsigned int numStudents;
+
     void main();
   public:
     NameServer(Printer &prt, unsigned int numVendingMachines, unsigned int numStudents);
     void VMregister(VendingMachine *vendingmachine);
-    VendingMachine *getMachine(unsigned int id);
-    VendingMachine **getMachineList();
+    VendingMachine* getMachine(unsigned int id);
+    VendingMachine** getMachineList();
 };
 
-_Task BottlingPlant 
+_Task BottlingPlant
 {
+	Printer &prt;
+	NameServer &nameServer;
+	unsigned int numVendingMachines;
+	unsigned int maxShippedPerFlavour;
+	unsigned int maxStockPerFlavour;
+	unsigned int timeBetweenShipments;
+
+	unsigned int numFlavours;
+	unsigned int* produced;
+	uCondition doneProducing;
+	uCondition doneShipping;
+
     void main();
   public:
-    BottlingPlant(Printer &prt, NameServer &nameServer, unsigned int numVendingMachines, 
+    BottlingPlant(Printer &prt, NameServer &nameServer, unsigned int numVendingMachines,
     	unsigned int maxShippedPerFlavour, unsigned int maxStockPerFlavour, unsigned int timeBetweenShipments);
+    ~BottlingPlant();
     bool getShipment(unsigned int cargo[]);
 };
 
-_Task Truck 
+_Task Truck
 {
+	Printer &prt;
+	NameServer &nameServer;
+	BottlingPlant &plant;
+	unsigned int numVendingMachines;
+	unsigned int maxStockPerFlavour;
+
     void main();
   public:
     Truck(Printer &prt, NameServer &nameServer, BottlingPlant &plant, unsigned int numVendingMachines, unsigned int maxStockPerFlavour);
 };
 
-_Monitor Printer 
+_Monitor Printer
 {
+	unsigned int numStudents;
+	unsigned int numVendingMachines;
+	unsigned int numCouriers;
+
   public:
     enum Kind {Parent, WATCardOffice, NameServer, Truck, BottlingPlant, Student, Vending, Courier};
     Printer(unsigned int numStudents, unsigned int numVendingMachines, unsigned int numCouriers);
@@ -138,14 +168,58 @@ _Monitor Printer
     void print(Kind kind, unsigned int lid, char state, int value1, int value2);
 };
 
-_Monitor PRNG 
+class PRNG
+{
+    uint32_t seed_;	// same results on 32/64-bit architectures
+
+  public:
+    PRNG(uint32_t s = 362436069)
+    {
+        seed_ = s;					// set seed
+        assert(((void)"invalid seed", seed_ != 0));
+    }
+
+    uint32_t seed() // read seed
+    {
+        return seed_;
+    }
+
+    void seed(uint32_t s) // reset seed
+    {
+        seed_ = s;					// set seed
+        assert(((void)"invalid seed", seed_ != 0));
+    }
+
+    uint32_t operator()() // [0,UINT_MAX]
+    {
+        seed_ = 36969 * (seed_ & 65535) + (seed_ >> 16); // scramble bits
+        return seed_;
+    }
+
+    uint32_t operator()(uint32_t u) // [0,u]
+    {
+        assert(((void)"invalid random range", u < (uint32_t)-1));
+        return operator()() % (u + 1);			// call operator()()
+    }
+
+    uint32_t operator()(uint32_t l, uint32_t u) // [l,u]
+    {
+        assert(((void)"invalid random range", l <= u));
+        return operator()( u - l ) + l;			// call operator()( uint32_t )
+    }
+};
+
+_Monitor MPRNG : private PRNG
 {
   public:
-    PRNG( unsigned int seed = 1009 ) { srand( seed ); }
-    void seed( unsigned int seed ) { srand( seed ); }
-    unsigned int operator()() { return rand(); }
-}; // _Monitor PRNG
+    MPRNG(uint32_t seed = 1009) { PRNG(seed); }
+    uint32_t seed() { return PRNG::seed(); }
+    void seed(uint32_t s) { PRNG::seed(s); }
+    uint32_t operator()() { return PRNG::operator()(); }
+    uint32_t operator()(uint32_t u) { return PRNG::operator()(u); }
+    uint32_t operator()(uint32_t l, uint32_t u) { return PRNG::operator()(l, u); }
+}; // _Monitor MPRNG
 
-extern PRNG r; // Global random generator
+extern MPRNG r; // Global random generator
 
 #endif // _SODA_H_
