@@ -43,6 +43,7 @@ class WATCard
 {
     WATCard(const WATCard &);			// prevent copying
     WATCard &operator=(const WATCard &);
+    int balance;
   public:
     WATCard();
     void deposit(unsigned int amount);
@@ -92,6 +93,7 @@ _Task Parent
   void main();
   public:
     Parent(Printer &prt, Bank &bank, unsigned int numStudents, unsigned int parentalDelay);
+    ~Parent();
 };
 
 _Task VendingMachine 

@@ -6,16 +6,18 @@ PRNG r; // Global random generator
 
 Parent(Printer &prt, Bank &bank, unsigned int numStudents, unsigned int parentalDelay) : prt ( prt ), bank ( bank ), numStudents ( numStudents ), parentalDelay ( parentalDelay ) {	}
 
+Parent::~Parent() {}
+
 void Parent::main() {	
+   for (;;) {
+     _Accept( ~Parent ) {
+	break;
+     } else {
 	// calculate random amount between 1 and 3
-	int deposit = rand() % 4; // fix to not gen 0
+	int deposit = 1 + (rand() % 3); // fix to not gen 0
 	yield(parentalDelay);
 	int studentID = rand() % numStudents; // give to a random student
 	bank.deposit(numStudents, deposit);
-	//
-	//
-	// must keep checking for a call to its destructor to know when to terminate
-	// use a terminating else on the _Accept
-	// i.e. parent is busy waiting
+    }
+   }
 }
-
