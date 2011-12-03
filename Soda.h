@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <cassert>
 
-#define Args unsigned int
+#define Args unsigned int 0
 
 struct ConfigParms
 {
@@ -46,6 +46,7 @@ class WATCard
 {
     WATCard(const WATCard &);			// prevent copying
     WATCard &operator=(const WATCard &);
+    int balance;
   public:
     WATCard();
     void deposit(unsigned int amount);
@@ -63,8 +64,11 @@ _Task WATCardOffice
 		Job(Args args) : args(args) {}
     };
     _Task Courier {  };				// communicates with bank
-
-    void main();
+  
+  Printer &prt;
+  Bank &bank;
+  unsigned int numCouriers;  
+  void main();
   public:
     _Event Lost {};
     WATCardOffice(Printer &prt, Bank &bank, unsigned int numCouriers);
@@ -75,6 +79,8 @@ _Task WATCardOffice
 
 _Monitor Bank
 {
+  unsigned int numStudents;
+  int *bankAccounts;
   public:
     Bank(unsigned int numStudents);
     void deposit(unsigned int id, unsigned int amount);
@@ -83,9 +89,14 @@ _Monitor Bank
 
 _Task Parent
 {
-    void main();
+  Printer &prt;
+  Bank &bank;
+  unsigned int numStudents;
+  unsigned int parentalDelay;
+  void main();
   public:
     Parent(Printer &prt, Bank &bank, unsigned int numStudents, unsigned int parentalDelay);
+    ~Parent();
 };
 
 _Task VendingMachine
