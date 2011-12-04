@@ -36,7 +36,12 @@ _Task Truck;
 
 _Task Student
 {
-    void main();
+  Printer &prt;
+  NameServer &nameServer;
+  WATCardOffice &cardOffice;
+  unsigned int id;
+  unsigned int maxPurchases;  
+  void main();
   public:
     Student(Printer &prt, NameServer &nameServer, WATCardOffice &cardOffice, unsigned int id, unsigned int maxPurchases);
 };
