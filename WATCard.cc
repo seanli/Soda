@@ -2,17 +2,8 @@
 
 using namespace std;
 
-PRNG r; // Global random generator
-
 WATCard::WATCard() {
 	balance = 0;
-}
-WATCard::WATCard(const WATCard &) {
-	
-} // prevent copying
-
-WATCard::WATCard &operator=(const WATCard &) {
-	return *this;
 }
 
 void WATCard::deposit(unsigned int amount) {

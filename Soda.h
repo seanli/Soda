@@ -10,8 +10,7 @@
 #include <sstream>
 #include <stdint.h>
 #include <cassert>
-
-#define Args unsigned int
+#include <queue>
 
 struct ConfigParms
 {
@@ -37,7 +36,12 @@ _Task Truck;
 
 _Task Student
 {
-    void main();
+  Printer &prt;
+  NameServer &nameServer;
+  WATCardOffice &cardOffice;
+  unsigned int id;
+  unsigned int maxPurchases;  
+  void main();
   public:
     Student(Printer &prt, NameServer &nameServer, WATCardOffice &cardOffice, unsigned int id, unsigned int maxPurchases);
 };
@@ -57,18 +61,33 @@ typedef Future_ISM<WATCard*> FWATCard;		// future WATCard pointer
 
 _Task WATCardOffice
 {
+struct Args {
+        unsigned int sid;
+        unsigned int depositAmount;
+	WATCard *&card;
+        Args(unsigned int sid, unsigned int depositAmount, WATCard *&card) : sid ( sid ), depositAmount ( depositAmount ), card ( card ) {}
+};
+
     struct Job // marshalled arguments and return future
     {
 		Args args;					// call arguments (YOU DEFINE "Args")
 		FWATCard result;			// return future
 		Job(Args args) : args(args) {}
     };
-    _Task Courier {  };				// communicates with bank
 
+  std::queue<Job *> jobQueue;
+  uCondition jobsAvailable;
   Printer &prt;
   Bank &bank;
   unsigned int numCouriers;
   void main();
+_Task Courier {
+        Bank &bank;
+        WATCardOffice *office;
+        void main();
+        public:
+                Courier(Bank &bank, WATCardOffice* office);
+};  
   public:
     _Event Lost {};
     WATCardOffice(Printer &prt, Bank &bank, unsigned int numCouriers);
@@ -79,6 +98,7 @@ _Task WATCardOffice
 
 _Monitor Bank
 {
+  uCondition sufficientFunds;
   unsigned int numStudents;
   int *bankAccounts;
   public:
