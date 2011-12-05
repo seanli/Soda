@@ -205,7 +205,6 @@ void Printer::print(Kind kind, unsigned int lid, char state, int value1)
 void Printer::print(Kind kind, unsigned int lid, char state, int value1, int value2)
 {
     unsigned int index = getIndex(kind, lid);
-    cout << index << endl;
     printUnit(index, state, value1, value2);
 }
 

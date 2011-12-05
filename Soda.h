@@ -46,6 +46,7 @@ _Task Student
   void main();
   public:
     Student(Printer &prt, NameServer &nameServer, WATCardOffice &cardOffice, unsigned int id, unsigned int maxPurchases);
+    ~Student();
 };
 
 class WATCard
@@ -109,6 +110,7 @@ _Monitor Bank
     int *bankAccounts;
   public:
     Bank(unsigned int numStudents);
+    ~Bank();
     void deposit(unsigned int id, unsigned int amount);
     void withdraw(unsigned int id, unsigned int amount);
 };
@@ -154,6 +156,7 @@ _Task NameServer
 	unsigned int numStudents;
 	VendingMachine** machines;
 	unsigned int currMachine;
+	unsigned int* studentCurrMachine;
 
     void main();
   public:
