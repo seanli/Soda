@@ -26,7 +26,6 @@ void VendingMachine::main()
     {
         _Accept(~VendingMachine)
         {
-            std::cout << "CALLED" << std::endl;
             break;
         }
         or _Accept(buy) {}
@@ -35,6 +34,19 @@ void VendingMachine::main()
             _Accept(restocked);
         }
     }
+}
+
+VendingMachine::Status VendingMachine::buy(Flavours flavour, WATCard &card)
+{
+	if(this->inventoryList[(int) flavour] < 1){
+		return VendingMachine::STOCK;
+	}
+	if(	card.getBalance() < this->sodaCost){
+		return VendingMachine::FUNDS;
+	}
+	prt->print( Printer::Vending,id, 'B', (int)flavour, inventoryList[(int) flavour]);
+	card.withdraw( this->sodaCost );
+	return VendingMachine::BUY;
 }
 
 unsigned int* VendingMachine::inventory()

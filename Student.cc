@@ -18,6 +18,6 @@ void Student::main()
     {
         prt.print(Printer::Student, id, 'B');
         purchases--;
-        yield();
+        yield(3);
     }
 }
