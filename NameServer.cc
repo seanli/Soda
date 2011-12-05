@@ -26,7 +26,7 @@ void NameServer::main()
 
 void NameServer::VMregister(VendingMachine *vendingmachine)
 {
-    if (currMachinel < numVendingMachines)
+    if (currMachine < numVendingMachines)
     {
         machines[currMachine] = vendingmachine;
         currMachine++;
