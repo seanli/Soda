@@ -65,7 +65,9 @@ void WATCardOffice::Courier::main() {
 	}
 }
 
-WATCardOffice::WATCardOffice(Printer &prt, Bank &bank, unsigned int numCouriers) : prt ( prt ), bank ( bank ), numCouriers ( numCouriers ) {} 
+WATCardOffice::WATCardOffice(Printer &prt, Bank &bank, unsigned int numCouriers) : prt ( prt ), bank ( bank ), numCouriers ( numCouriers ) {
+	prt.print( Printer::WATCardOffice, 'S' );
+} 
 
 WATCardOffice::~WATCardOffice() {
 	prt.print( Printer::WATCardOffice, 'F' );

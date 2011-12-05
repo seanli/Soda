@@ -8,9 +8,6 @@ Parent::~Parent()
 }
 
 void Parent::main() {
-    prt.print(Printer::Parent, 'S');
-    prt.print(Printer::Student, 1, 'S', 5, 2);
-    prt.print(Printer::Student, 1, 'S', 5, 2);
 	int deposit = 0;
 	int studentID = 0;
    for (;;) {
