@@ -9,8 +9,8 @@ Parent::~Parent()
 
 void Parent::main() {
     prt.print(Printer::Parent, 'S');
-	int deposit = 0;
-	int studentID = 0;
+    int deposit = 0;
+    int studentID = 0;
     for (;;)
     {
         _Accept( ~Parent )
