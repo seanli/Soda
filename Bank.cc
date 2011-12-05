@@ -1,7 +1,5 @@
 #include "Soda.h"
 
-using namespace std;
-
 Bank::Bank(unsigned int numStudents) : numStudents( numStudents ) {
 	bankAccounts = new int[numStudents];
 	for (unsigned int i = 0; i < numStudents; i++) {

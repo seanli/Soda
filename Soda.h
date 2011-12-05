@@ -12,6 +12,8 @@
 #include <cassert>
 #include <queue>
 
+#define INT_MAX 1000
+
 struct ConfigParms
 {
     unsigned int sodaCost;                      // MSRP per bottle
@@ -211,6 +213,42 @@ _Task Truck
     ~Truck();
 };
 
+/*_Monitor Printer {
+
+  public:
+    enum Kind { Parent, WATCardOffice, NameServer, Truck, BottlingPlant, Student, Vending, Courier };
+    Printer( unsigned int numStudents, unsigned int numVendingMachines, unsigned int numCouriers );
+    ~Printer();
+    void print( Kind kind, char state );
+    void print( Kind kind, char state, int value1 );
+    void print( Kind kind, char state, int value1, int value2 );
+    void print( Kind kind, unsigned int lid, char state );
+    void print( Kind kind, unsigned int lid, char state, int value1 );
+    void print( Kind kind, unsigned int lid, char state, int value1, int value2 );
+
+  private:
+
+    char* allStates;
+
+    int* value_one;
+    int* value_two;
+
+    unsigned int numStudent;
+    unsigned int numMachine;
+    unsigned int numCourier;
+
+    unsigned int student_start_index;
+    unsigned int machine_start_index;
+    unsigned int courier_start_index;
+
+    unsigned int totalTasks;
+
+    void flush();
+    void setState( Kind kind, char state, unsigned int value1, unsigned int value2 );
+    void setState( Kind kind, char state, unsigned int id, unsigned int value1, unsigned int value2 );
+    void printFinish( char state, unsigned int id );
+};*/
+
 _Monitor Printer
 {
 	unsigned int numStudents;
@@ -244,8 +282,8 @@ _Monitor Printer
     void print(Kind kind, unsigned int lid, char state, int value1, int value2);
 
   private:
-    unsigned int getIndex(Kind kind);
-	unsigned int getIndex(Kind kind, unsigned int id);
+    _Nomutex unsigned int getIndex(Kind kind);
+	_Nomutex unsigned int getIndex(Kind kind, unsigned int id);
 };
 
 class PRNG

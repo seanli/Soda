@@ -1,12 +1,16 @@
 #include "Soda.h"
 
-using namespace std;
-
 Parent::Parent(Printer &prt, Bank &bank, unsigned int numStudents, unsigned int parentalDelay) : prt ( prt ), bank ( bank ), numStudents ( numStudents ), parentalDelay ( parentalDelay ) {	}
 
-Parent::~Parent() {}
+Parent::~Parent()
+{
+    prt.print(Printer::Parent, 'F');
+}
 
-void Parent::main() {	
+void Parent::main() {
+    prt.print(Printer::Parent, 'S');
+    prt.print(Printer::Student, 1, 'S', 5, 2);
+    prt.print(Printer::Student, 1, 'S', 5, 2);
 	int deposit = 0;
 	int studentID = 0;
    for (;;) {

@@ -81,7 +81,7 @@ void Printer::printFlush()
         if (units[i].state != ' ')
         {
             printTab(tabsCount);
-            tabsCount = 1;
+            tabsCount = 0;
 
             cout << units[i].state;
 
@@ -132,7 +132,7 @@ void Printer::printFinish(char state, unsigned int index)
     cout << endl;
 }
 
-unsigned int Printer::getIndex(Kind kind)
+_Nomutex unsigned int Printer::getIndex(Kind kind)
 {
     switch(kind)
     {
@@ -156,7 +156,7 @@ unsigned int Printer::getIndex(Kind kind)
     return -1;
 }
 
-unsigned int Printer::getIndex(Kind kind, unsigned int id)
+_Nomutex unsigned int Printer::getIndex(Kind kind, unsigned int id)
 {
     switch(kind)
     {
@@ -205,5 +205,242 @@ void Printer::print(Kind kind, unsigned int lid, char state, int value1)
 void Printer::print(Kind kind, unsigned int lid, char state, int value1, int value2)
 {
     unsigned int index = getIndex(kind, lid);
+    cout << index << endl;
     printUnit(index, state, value1, value2);
 }
+
+/*#include "Soda.h"
+
+using namespace std;
+
+
+Printer::Printer( unsigned int numStudents, unsigned int numVendingMachines, unsigned int numCouriers )
+{
+
+    numStudent = numStudents;
+    numMachine = numVendingMachines;
+    numCourier = numCouriers;
+
+    student_start_index = 5;
+    machine_start_index = 5 + numStudent;
+    courier_start_index = machine_start_index + numCourier;
+
+    totalTasks = numStudent + numMachine + numCourier + 5;
+
+    allStates = new char[totalTasks];
+    value_one = new int[totalTasks];
+    value_two = new int[totalTasks];
+
+    for(unsigned int i = 0; i < totalTasks; i++)
+    {
+        allStates[i] = ' ';
+        value_one[i] = INT_MAX;
+        value_two[i] = INT_MAX;
+    }
+
+    cout << "Parent\tWATOff\tNames\tTruck\tPlant\t";
+
+    for(unsigned int i = 0; i < numStudent; i++)
+    {
+        cout << "Stud:" << i << "\t";
+    }
+
+    for(unsigned int i = 0; i < numMachine; i++)
+    {
+        cout << "Mach:" << i << "\t";
+    }
+
+    for(unsigned int i = 0; i < numCourier; i++)
+    {
+        cout << "Cour:" << i;
+        if(i != numCourier - 1)
+        {
+            cout << "\t";
+        }
+    }
+
+    cout << endl;
+
+    for(unsigned int i = 0; i < 5 + numStudents + numMachine + numCouriers; i++)
+    {
+        cout << "*******";
+        if(i != (totalTasks - 1))
+        {
+            cout << "\t";
+        }
+    }
+
+    cout << endl;
+}
+
+Printer::~Printer()
+{
+    cout << "***********************" << endl;
+
+    delete allStates;
+    delete value_one;
+    delete value_two;
+}
+
+void Printer::print( Kind kind, char state )
+{
+    setState(kind, state, INT_MAX, INT_MAX);
+}
+
+void Printer::print( Kind kind, char state, int value1 )
+{
+    setState(kind, state, value1, INT_MAX);
+}
+
+void Printer::print( Kind kind, char state, int value1, int value2 )
+{
+    setState(kind, state, value1, value2);
+}
+
+void Printer::print( Kind kind, unsigned int lid, char state )
+{
+    setState(kind, state, lid, INT_MAX, INT_MAX);
+}
+
+void Printer::print( Kind kind, unsigned int lid, char state, int value1 )
+{
+    setState(kind, state, lid, value1, INT_MAX);
+}
+
+void Printer::print( Kind kind, unsigned int lid, char state, int value1, int value2 )
+{
+    setState(kind, state, lid, value1, value2);
+
+}
+
+void Printer::flush()
+{
+    int tabcounter = 0;
+
+    for( unsigned int i = 0; i < totalTasks; i++ )
+    {
+        // if state exist for element i, print, otherwise hold tab.
+        if(allStates[i] != ' ')
+        {
+            for( ; tabcounter > 0; tabcounter--)
+            {
+                cout << '\t';
+            }
+
+            cout << allStates[i];
+
+            if(value_one[i] != INT_MAX)
+            {
+                cout << ':' << value_one[i];
+            }
+
+            if(value_two[i] != INT_MAX)
+            {
+                cout << ',' << value_two[i];
+            }
+
+
+            allStates[i] = ' ';
+            value_one[i] = INT_MAX;
+            value_two[i] = INT_MAX;
+        }
+
+        tabcounter++;
+    }
+
+    cout << endl;
+}
+
+void Printer::setState(Kind kind, char state, unsigned int value1, unsigned int value2)
+{
+    unsigned int index = (unsigned int)kind;
+
+    if(allStates[index] != ' ')
+    {
+        flush();
+    }
+
+    if(state == 'F')
+    {
+        printFinish(state, index);
+    }
+    else
+    {
+        //assign new values to buffer
+
+        allStates[index] = state;
+        value_one[index] = value1;
+        value_two[index] = value2;
+    }
+
+}
+
+void Printer::setState(Kind kind, char state, unsigned int id, unsigned int value1, unsigned int value2)
+{
+    unsigned int index;
+
+    if(kind == Student)
+    {
+        index = student_start_index + id;
+    }
+    else if(kind == Vending)
+    {
+        index = machine_start_index + id;
+    }
+    else if(kind == Courier)
+    {
+        index = courier_start_index + id;
+    }
+    else
+    {
+        cout << "You're calling the wrong print function." << endl;
+        assert(false);
+    }
+
+    if(allStates[index] != ' ')
+    {
+        flush();
+    }
+
+    if(state == 'F')
+    {
+        printFinish(state, index);
+    }
+    else
+    {
+        //assign new values to buffer
+
+        allStates[index] = state;
+        value_one[index] = value1;
+        value_two[index] = value2;
+    }
+}
+
+void Printer::printFinish(char state, unsigned int id)
+{
+    for(unsigned int i = 0; i < id; i++)
+    {
+        cout << "..." << '\t';
+    }
+
+    cout << state;
+
+    if(id != totalTasks - 1)
+    {
+        cout << '\t';
+    }
+
+    for(unsigned int i = id; i < totalTasks - 1; i++)
+    {
+        cout << "...";
+
+        if(i != totalTasks - 1)
+        {
+            cout << '\t';
+        }
+    }
+
+    cout << endl;
+}*/
+
+

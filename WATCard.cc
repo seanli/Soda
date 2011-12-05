@@ -1,7 +1,5 @@
 #include "Soda.h"
 
-using namespace std;
-
 WATCard::WATCard() {
 	balance = 0;
 }
