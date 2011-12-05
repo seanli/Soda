@@ -8,17 +8,23 @@ Parent::~Parent()
 }
 
 void Parent::main() {
-	int deposit = 0;
-	int studentID = 0;
-   for (;;) {
-     _Accept( ~Parent ) {
-	break;
-     } else {
-	// calculate random amount between 1 and 3
-	deposit = r(1, 3); // fix to not gen 0
-	yield(parentalDelay);
-	studentID = r() % numStudents; // give to a random student
-	bank.deposit(studentID, deposit);
-    }
+    prt.print(Printer::Parent, 'S');
+    int deposit = 0;
+    int studentID = 0;
+    for (;;)
+    {
+        _Accept( ~Parent )
+        {
+            break;
+        }
+        else
+        {
+            // calculate random amount between 1 and 3
+            deposit = r(1, 3); // fix to not gen 0
+            yield(parentalDelay);
+            studentID = r() % numStudents; // give to a random student
+            prt.print(Printer::Parent, 'D', studentID, deposit);
+            bank.deposit(studentID, deposit);
+        }
    }
 }

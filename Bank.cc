@@ -7,15 +7,20 @@ Bank::Bank(unsigned int numStudents) : numStudents( numStudents ) {
 	}
 }
 
+Bank::~Bank()
+{
+    delete[] bankAccounts;
+}
+
 void Bank::deposit(unsigned int id, unsigned int amount) {
-	bankAccounts[id - 5] += amount;
+	bankAccounts[id] += amount;
 	sufficientFunds.signal();
 }
 
 void Bank::withdraw(unsigned int id, unsigned int amount) {
-	while ((unsigned int) bankAccounts[id - 5] < amount) {
+	while ((unsigned int) bankAccounts[id] < amount) {
 		sufficientFunds.wait();
 	}
-	bankAccounts[id - 5] -= amount;
+	bankAccounts[id] -= amount;
 }
 

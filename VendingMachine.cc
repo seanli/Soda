@@ -16,22 +16,36 @@ VendingMachine::VendingMachine(Printer &prt, NameServer &nameServer, unsigned in
 VendingMachine::~VendingMachine()
 {
     delete[] stock;
-    prt.print(Printer::Vending, 'F');
+    prt.print(Printer::Vending, id, 'F');
 }
 
 void VendingMachine::main()
 {
-    prt.print(Printer::Vending, 'S', sodaCost);
+    prt.print(Printer::Vending, id, 'S', sodaCost);
+    for (;;)
+    {
+        _Accept(~VendingMachine)
+        {
+            std::cout << "CALLED" << std::endl;
+            break;
+        }
+        or _Accept(buy) {}
+        or _Accept(inventory)
+        {
+            _Accept(restocked);
+        }
+    }
 }
 
 unsigned int* VendingMachine::inventory()
 {
+    prt.print(Printer::Vending, id, 'r');
     return stock;
 }
 
 void VendingMachine::restocked()
 {
-
+    prt.print(Printer::Vending, id, 'R');
 }
 
 _Nomutex unsigned int VendingMachine::cost()

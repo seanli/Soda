@@ -33,6 +33,7 @@ void BottlingPlant::main()
   	{
   	    _Accept(~BottlingPlant)
   	    {
+
             plantClosing = true;
   	        break;
   	    }
