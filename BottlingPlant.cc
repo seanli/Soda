@@ -22,20 +22,31 @@ BottlingPlant::~BottlingPlant()
 
 void BottlingPlant::main()
 {
+    prt.print(Printer::BottlingPlant, 'S');
+
     Truck *truck = new Truck(prt, nameServer, *this, numVendingMachines, maxStockPerFlavour);
 
 	for(;;)
   	{
-        for (unsigned int i = 0; i < numFlavours; i++)
-        {
-            produced[i] = r(0, maxShippedPerFlavour);
-        } // for
-        doneProducing.signalBlock();
-        cout << "signaled producing" << endl;
-        cout << "blocked" << endl;
-        yield(timeBetweenShipments);
-        doneShipping.wait();
-        cout << "unblocked production" << endl;
+  	    _Accept(~BottlingPlant)
+  	    {
+
+  	        break;
+  	    }
+  	    else
+  	    {
+  	        cout << "got before loop " << endl;
+  	        for (unsigned int i = 0; i < numFlavours; i++)
+            {
+                produced[i] = r(0, maxShippedPerFlavour);
+            } // for
+            doneProducing.signalBlock();
+            cout << "signaled producing" << endl;
+            cout << "blocked" << endl;
+            doneShipping.wait();
+            yield(timeBetweenShipments);
+            cout << "unblocked production" << endl;
+  	    }
   	} // for
 
   	delete truck;
@@ -47,13 +58,7 @@ bool BottlingPlant::getShipment(unsigned int cargo[])
     doneProducing.wait();
     cout << "unblocked truck" << endl;
     cargo = produced;
-	doneShipping.signalBlock();
-	if (cargo == NULL)
-	{
-	    return true;
-	}
-	else
-	{
-	    return false;
-	}
+    // Nameserver stuff
+	doneShipping.signal();
+	return (cargo == NULL);
 }
