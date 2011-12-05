@@ -40,7 +40,7 @@ _Task Student
   NameServer &nameServer;
   WATCardOffice &cardOffice;
   unsigned int id;
-  unsigned int maxPurchases;  
+  unsigned int maxPurchases;
   void main();
   public:
     Student(Printer &prt, NameServer &nameServer, WATCardOffice &cardOffice, unsigned int id, unsigned int maxPurchases);
@@ -61,12 +61,13 @@ typedef Future_ISM<WATCard*> FWATCard;		// future WATCard pointer
 
 _Task WATCardOffice
 {
-struct Args {
+    struct Args
+    {
         unsigned int sid;
         unsigned int depositAmount;
-	WATCard *&card;
+        WATCard *&card;
         Args(unsigned int sid, unsigned int depositAmount, WATCard *&card) : sid ( sid ), depositAmount ( depositAmount ), card ( card ) {}
-};
+    };
 
     struct Job // marshalled arguments and return future
     {
@@ -75,19 +76,22 @@ struct Args {
 		Job(Args args) : args(args) {}
     };
 
-  std::queue<Job *> jobQueue;
-  uCondition jobsAvailable;
-  Printer &prt;
-  Bank &bank;
-  unsigned int numCouriers;
-  void main();
-_Task Courier {
+    std::queue<Job *> jobQueue;
+    uCondition jobsAvailable;
+    Printer &prt;
+    Bank &bank;
+    unsigned int numCouriers;
+    void main();
+
+    _Task Courier
+    {
         Bank &bank;
         WATCardOffice *office;
         void main();
         public:
-                Courier(Bank &bank, WATCardOffice* office);
-};  
+            Courier(Bank &bank, WATCardOffice* office);
+    };
+
   public:
     _Event Lost {};
     WATCardOffice(Printer &prt, Bank &bank, unsigned int numCouriers);
@@ -98,9 +102,9 @@ _Task Courier {
 
 _Monitor Bank
 {
-  uCondition sufficientFunds;
-  unsigned int numStudents;
-  int *bankAccounts;
+    uCondition sufficientFunds;
+    unsigned int numStudents;
+    int *bankAccounts;
   public:
     Bank(unsigned int numStudents);
     void deposit(unsigned int id, unsigned int amount);
@@ -109,11 +113,11 @@ _Monitor Bank
 
 _Task Parent
 {
-  Printer &prt;
-  Bank &bank;
-  unsigned int numStudents;
-  unsigned int parentalDelay;
-  void main();
+    Printer &prt;
+    Bank &bank;
+    unsigned int numStudents;
+    unsigned int parentalDelay;
+    void main();
   public:
     Parent(Printer &prt, Bank &bank, unsigned int numStudents, unsigned int parentalDelay);
     ~Parent();
@@ -121,13 +125,21 @@ _Task Parent
 
 _Task VendingMachine
 {
+    Printer &prt;
+    NameServer &nameServer;
+    unsigned int id;
+    unsigned int sodaCost;
+    unsigned int maxStockPerFlavour;
+    unsigned int numFlavours;
+    unsigned int* stock;
     void main();
   public:
     enum Flavours {BLUES, CLASSICAL, ROCK, JAZZ, NUM_FLAVOURS}; 	// flavours of soda (YOU DEFINE)
     enum Status {BUY, STOCK, FUNDS};								// purchase status: successful buy, out of stock, insufficient funds
     VendingMachine(Printer &prt, NameServer &nameServer, unsigned int id, unsigned int sodaCost, unsigned int maxStockPerFlavour);
+    ~VendingMachine();
     Status buy(Flavours flavour, WATCard &card);
-    unsigned int *inventory();
+    unsigned int* inventory();
     void restocked();
     _Nomutex unsigned int cost();
     _Nomutex unsigned int getId();
@@ -138,10 +150,13 @@ _Task NameServer
 	Printer &prt;
 	unsigned int numVendingMachines;
 	unsigned int numStudents;
+	VendingMachine** machines;
+	unsigned int currMachine;
 
     void main();
   public:
     NameServer(Printer &prt, unsigned int numVendingMachines, unsigned int numStudents);
+    ~NameServer();
     void VMregister(VendingMachine *vendingmachine);
     VendingMachine* getMachine(unsigned int id);
     VendingMachine** getMachineList();
@@ -157,9 +172,13 @@ _Task BottlingPlant
 	unsigned int timeBetweenShipments;
 
 	unsigned int numFlavours;
-	unsigned int* produced;
-	uCondition doneProducing;
-	uCondition doneShipping;
+	unsigned int* shipment;
+	Truck* truck;
+
+	uCondition producedShipment;
+
+	bool plantClosing;
+	uCondition closing;
 
     void main();
   public:
@@ -177,9 +196,17 @@ _Task Truck
 	unsigned int numVendingMachines;
 	unsigned int maxStockPerFlavour;
 
+    unsigned int numFlavours;
+    unsigned int* cargo;
+    bool gotCargo;
+
+    VendingMachine** destMachines;
+    unsigned int* machineInventory;
+
     void main();
   public:
     Truck(Printer &prt, NameServer &nameServer, BottlingPlant &plant, unsigned int numVendingMachines, unsigned int maxStockPerFlavour);
+    ~Truck();
 };
 
 _Monitor Printer

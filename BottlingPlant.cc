@@ -5,60 +5,75 @@ using namespace std;
 BottlingPlant::BottlingPlant(Printer &prt, NameServer &nameServer, unsigned int numVendingMachines,
 	unsigned int maxShippedPerFlavour, unsigned int maxStockPerFlavour, unsigned int timeBetweenShipments) :
     prt(prt), nameServer(nameServer), numVendingMachines(numVendingMachines), maxShippedPerFlavour(maxShippedPerFlavour),
-    maxStockPerFlavour(maxStockPerFlavour), timeBetweenShipments(timeBetweenShipments)
+    maxStockPerFlavour(maxStockPerFlavour), timeBetweenShipments(timeBetweenShipments), plantClosing(false)
 {
 	numFlavours = (int)VendingMachine::NUM_FLAVOURS;
-	produced = new unsigned int[numFlavours];
+	shipment = new unsigned int[numFlavours];
+
 	for (unsigned int i = 0; i < numFlavours; i++)
 	{
-		produced[i] = 0;
+		shipment[i] = 0;
 	}
 }
 
 BottlingPlant::~BottlingPlant()
 {
-	delete[] produced;
+    closing.wait();
+    delete truck;
+	delete[] shipment;
+	prt.print(Printer::BottlingPlant, 'F');
 }
 
 void BottlingPlant::main()
 {
     prt.print(Printer::BottlingPlant, 'S');
 
-    Truck *truck = new Truck(prt, nameServer, *this, numVendingMachines, maxStockPerFlavour);
+    truck = new Truck(prt, nameServer, *this, numVendingMachines, maxStockPerFlavour);
+    _Accept(getShipment);
 
 	for(;;)
   	{
   	    _Accept(~BottlingPlant)
   	    {
-
+            plantClosing = true;
   	        break;
   	    }
   	    else
   	    {
-  	        cout << "got before loop " << endl;
-  	        for (unsigned int i = 0; i < numFlavours; i++)
+  	        int totalSodaProduced = 0;
+
+            for(unsigned int i = 0; i < numFlavours; i++)
             {
-                produced[i] = r(0, maxShippedPerFlavour);
-            } // for
-            doneProducing.signalBlock();
-            cout << "signaled producing" << endl;
-            cout << "blocked" << endl;
-            doneShipping.wait();
+                shipment[i] = r(0, maxShippedPerFlavour);
+                totalSodaProduced += shipment[i];
+            }
+
+            prt.print(Printer::BottlingPlant, 'G', totalSodaProduced);
+            producedShipment.signalBlock();
+            prt.print(Printer::BottlingPlant, 'P');
+
             yield(timeBetweenShipments);
-            cout << "unblocked production" << endl;
   	    }
   	} // for
-
-  	delete truck;
 }
 
 bool BottlingPlant::getShipment(unsigned int cargo[])
 {
-    cout << "blocked waiting for production" << endl;
-    doneProducing.wait();
-    cout << "unblocked truck" << endl;
-    cargo = produced;
-    // Nameserver stuff
-	doneShipping.signal();
-	return (cargo == NULL);
+    if(!plantClosing)
+    {
+        producedShipment.wait();
+
+        for(unsigned int i = 0; i < numFlavours; i++)
+        {
+            cargo[i] = shipment[i];
+        }
+
+        producedShipment.signal();
+        return false;
+    }
+    else
+    {
+        closing.signal();
+        return true;
+    }
 }
