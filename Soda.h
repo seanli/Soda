@@ -74,12 +74,12 @@ struct Args {
 		FWATCard result;			// return future
 		Job(Args args) : args(args) {}
     };
-  
+
   std::queue<Job *> jobQueue;
   uCondition jobsAvailable;
   Printer &prt;
   Bank &bank;
-  unsigned int numCouriers;  
+  unsigned int numCouriers;
   void main();
 _Task Courier {
         Bank &bank;
@@ -188,15 +188,35 @@ _Monitor Printer
 	unsigned int numVendingMachines;
 	unsigned int numCouriers;
 
+	struct Unit
+	{
+        char state;
+        int value1;
+        int value2;
+        Unit() : state(' '), value1(-1), value2(-1) {}
+	}; // Unit
+	std::vector<Unit> units;
+
+	void printTab();
+	void printTab(unsigned int times);
+	void printUnit(unsigned int index, char state, int value1, int value2);
+	void printFlush();
+	void printFinish(char state, unsigned int index);
+
   public:
     enum Kind {Parent, WATCardOffice, NameServer, Truck, BottlingPlant, Student, Vending, Courier};
     Printer(unsigned int numStudents, unsigned int numVendingMachines, unsigned int numCouriers);
+    ~Printer();
     void print(Kind kind, char state);
     void print(Kind kind, char state, int value1);
     void print(Kind kind, char state, int value1, int value2);
     void print(Kind kind, unsigned int lid, char state);
     void print(Kind kind, unsigned int lid, char state, int value1);
     void print(Kind kind, unsigned int lid, char state, int value1, int value2);
+
+  private:
+    unsigned int getIndex(Kind kind);
+	unsigned int getIndex(Kind kind, unsigned int id);
 };
 
 class PRNG
