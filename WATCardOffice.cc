@@ -37,6 +37,9 @@ void WATCardOffice::Courier::main() {
 	   } else {
 		// sleep on a cond variable
 		office->jobsAvailable.wait();
+		if (office->jobQueue.empty()) {
+			break;
+		}
 		Job *newJob = office -> requestWork();	
 		sid  = newJob->args.sid;
 		amount = newJob->args.depositAmount;
