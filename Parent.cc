@@ -7,14 +7,16 @@ Parent::Parent(Printer &prt, Bank &bank, unsigned int numStudents, unsigned int 
 Parent::~Parent() {}
 
 void Parent::main() {	
+	int deposit = 0;
+	int studentID = 0;
    for (;;) {
      _Accept( ~Parent ) {
 	break;
      } else {
 	// calculate random amount between 1 and 3
-	int deposit = 1 + (rand() % 3); // fix to not gen 0
+	deposit = r(1, 3); // fix to not gen 0
 	yield(parentalDelay);
-	int studentID = rand() % numStudents; // give to a random student
+	studentID = r() % numStudents; // give to a random student
 	bank.deposit(studentID, deposit);
     }
    }

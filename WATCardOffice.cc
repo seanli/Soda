@@ -47,7 +47,7 @@ void WATCardOffice::Courier::main() {
 		// ask bank for moneys, wait till enough moneys is obtained
 		WATCard *newCard = newJob->args.card;
 		newCard->deposit(amount+originalBalance);
-		lostChance = rand() % 6;
+		lostChance = r() % 6;
 		if (lostChance == 0) {
 			newJob->result.exception(new WATCardOffice::Lost);
 		}
