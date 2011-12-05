@@ -90,14 +90,16 @@ _Task WATCardOffice
     {
         Bank &bank;
         WATCardOffice *office;
+	Printer &prt;
         void main();
         public:
-            Courier(Bank &bank, WATCardOffice* office);
+            Courier(Bank &bank, WATCardOffice* office, Printer &prt);
     };
 
   public:
     _Event Lost {};
     WATCardOffice(Printer &prt, Bank &bank, unsigned int numCouriers);
+    ~WATCardOffice();
     FWATCard create(unsigned int sid, unsigned int amount, WATCard *&card);
     FWATCard transfer(unsigned int sid, unsigned int amount, WATCard *card);
     Job *requestWork();
